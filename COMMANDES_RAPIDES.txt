@@ -1,0 +1,172 @@
+================================================================================
+COMMANDES RAPIDES - AIDE-MÉMOIRE
+================================================================================
+
+📋 INSTALLATION LOCALE
+================================================================================
+pip install -r requirements.txt
+
+
+📋 SYSTÈME DE QUEUE (RECOMMANDÉ)
+================================================================================
+
+# Terminal 1 : Démarrer le worker
+python worker.py
+
+# Terminal 2 : Ajouter des jobs
+python add_job.py mon_fichier.csv --priority 1 --user "Alice"
+python add_job.py autre_fichier.csv --priority 5 --user "Bob"
+
+# Consulter l'état
+python monitor.py
+
+
+📋 UTILISATION DIRECTE (Sans queue)
+================================================================================
+python run_scraper.py mon_fichier.csv
+
+
+================================================================================
+📤 GITHUB
+================================================================================
+
+# Initialiser
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/username/repo.git
+git push -u origin main
+
+# Mises à jour
+git add .
+git commit -m "Description des changements"
+git push
+
+
+================================================================================
+🚀 VPS HOSTINGER - DÉPLOIEMENT
+================================================================================
+
+# Méthode 1 : Script automatique
+bash deploy.sh
+# (Modifier VPS_IP dans le fichier avant)
+
+# Méthode 2 : Manuel
+ssh root@VOTRE_IP
+git clone https://github.com/username/repo.git
+cd repo
+bash install_vps.sh
+sudo bash install_service.sh
+sudo systemctl start scraper-worker
+sudo systemctl enable scraper-worker
+
+
+================================================================================
+🔧 GESTION DU SERVICE VPS
+================================================================================
+
+# Démarrer
+sudo systemctl start scraper-worker
+
+# Arrêter
+sudo systemctl stop scraper-worker
+
+# Redémarrer
+sudo systemctl restart scraper-worker
+
+# Status
+sudo systemctl status scraper-worker
+
+# Logs en temps réel
+tail -f logs/worker.log
+
+
+================================================================================
+📊 AJOUTER JOB SUR VPS
+================================================================================
+
+# 1. Copier le CSV sur le VPS
+scp mon_fichier.csv root@VOTRE_IP:/opt/scrapeur-site-web/
+
+# 2. SSH au VPS
+ssh root@VOTRE_IP
+
+# 3. Ajouter le job
+cd /opt/scrapeur-site-web
+source venv/bin/activate
+python add_job.py mon_fichier.csv --priority 1
+
+# 4. Consulter l'état
+python monitor.py
+
+# 5. Récupérer résultats (depuis PC local)
+scp root@VOTRE_IP:/opt/scrapeur-site-web/results/*.json ./
+
+
+================================================================================
+🔍 MONITORING
+================================================================================
+
+# État de la queue
+python monitor.py
+
+# Logs worker
+tail -f logs/worker.log
+
+# Logs système (VPS)
+sudo journalctl -u scraper-worker -f
+
+
+================================================================================
+⚙️ CONFIGURATION
+================================================================================
+
+Modifier config.py :
+
+# Plus lent mais plus sûr (éviter ban)
+DELAY_BETWEEN_REQUESTS = 2.0
+MAX_CONCURRENT_SITES = 5
+
+# Plus rapide (risque ban augmenté)
+DELAY_BETWEEN_REQUESTS = 0.2
+MAX_CONCURRENT_SITES = 15
+
+
+================================================================================
+🧪 TESTS
+================================================================================
+
+# Test avec exemple.csv (2 sites fictifs)
+python add_job.py example.csv --priority 1
+
+# Test monitoring
+python monitor.py
+
+
+================================================================================
+📁 RÉCUPÉRATION RÉSULTATS
+================================================================================
+
+# Local
+ls results/
+
+# VPS vers local
+scp -r root@VOTRE_IP:/opt/scrapeur-site-web/results/ ./
+
+
+================================================================================
+🔄 MISE À JOUR CODE (VPS)
+================================================================================
+
+ssh root@VOTRE_IP
+cd /opt/scrapeur-site-web
+git pull
+source venv/bin/activate
+pip install -r requirements.txt
+sudo systemctl restart scraper-worker
+
+
+================================================================================
+FIN
+================================================================================
+

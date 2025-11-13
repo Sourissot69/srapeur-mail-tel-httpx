@@ -1,0 +1,24 @@
+# Dépendances pour le scraper
+
+# Client HTTP asynchrone
+httpx==0.25.2
+
+# Parsing HTML
+beautifulsoup4==4.12.2
+# Note: lxml supprimé car nécessite Visual C++ sur Windows
+# On utilise html.parser (inclus dans Python)
+
+# Extraction de domaines
+tldextract==5.1.1
+
+# API Web (optionnel - pour api_server.py)
+flask==3.0.0
+flask-cors==4.0.0
+
+# Standard library (déjà inclus dans Python 3.7+)
+# - asyncio
+# - re
+# - json
+# - logging
+# - html.parser
+

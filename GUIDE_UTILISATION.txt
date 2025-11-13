@@ -1,0 +1,213 @@
+================================================================================
+GUIDE D'UTILISATION - SCRAPER AVEC SYSTÈME DE QUEUE
+================================================================================
+
+📋 FICHIERS ESSENTIELS DU PROJET
+================================================================================
+
+CONFIGURATION :
+  - config.py           Configuration (timeouts, user agents, fournisseurs emails)
+  - requirements.txt    Dépendances Python
+
+SCRAPER :
+  - scraper.py          ⭐ Scraper principal (classe WebScraper)
+  - extractors.py       Extraction emails et réseaux sociaux
+  - utils.py            Fonctions utilitaires
+
+SYSTÈME DE QUEUE :
+  - add_job.py          ⭐ Ajouter un job à la queue
+  - worker.py           ⭐ Worker qui traite les jobs
+  - monitor.py          ⭐ Consulter l'état de la queue
+
+LEGACY (optionnel) :
+  - run_scraper.py      Lancer scraping direct sans queue
+
+
+================================================================================
+🚀 UTILISATION - SCÉNARIO MULTI-UTILISATEURS
+================================================================================
+
+ÉTAPE 1 : DÉMARRER LE WORKER (1 fois, à laisser tourner)
+------------------------------------------------------------------------
+Terminal dédié :
+
+    python worker.py
+
+Le worker affiche :
+    ################################
+    WORKER DEMARRE
+    ################################
+    En attente de jobs...
+
+
+ÉTAPE 2 : AJOUTER DES JOBS (depuis n'importe quel terminal)
+------------------------------------------------------------------------
+
+User 1 :
+    python add_job.py mon-fichier-1.csv --priority 1 --user "Alice"
+
+User 2 :
+    python add_job.py mon-fichier-2.csv --priority 2 --user "Bob"
+
+User 3 :
+    python add_job.py mon-fichier-3.csv --priority 1 --user "Charlie"
+
+
+ORDRE DE TRAITEMENT :
+    1. mon-fichier-1.csv (priorité 1, arrivé en premier)
+    2. mon-fichier-3.csv (priorité 1, arrivé en deuxième)
+    3. mon-fichier-2.csv (priorité 2)
+
+
+ÉTAPE 3 : CONSULTER L'ÉTAT
+------------------------------------------------------------------------
+N'importe quel terminal :
+
+    python monitor.py
+
+Affiche :
+    - Nombre de jobs en attente / en cours / terminés
+    - Job en cours avec durée
+    - Liste des jobs en attente
+    - Derniers jobs complétés avec stats
+
+
+================================================================================
+📊 FORMAT DES RÉSULTATS
+================================================================================
+
+Fichier sauvegardé dans :
+    results/scraping_nom-du-csv_TIMESTAMP.json
+
+Format JSON :
+    [
+      {
+        "id": 1,
+        "url": "https://example.com",
+        "nom": "Nom du site",
+        "nb_emails": 2,
+        "emails": ["contact@example.com", "info@example.com"],
+        "nb_reseaux_sociaux": 3,
+        "reseaux_sociaux": {
+          "facebook": ["https://facebook.com/example"],
+          "instagram": ["https://instagram.com/example"],
+          "linkedin": ["https://linkedin.com/company/example"]
+        }
+      }
+    ]
+
+
+================================================================================
+📧 FILTRAGE DES EMAILS (Important !)
+================================================================================
+
+Le scraper garde UNIQUEMENT :
+  1. Emails du domaine du site (ex: contact@example.com pour example.com)
+  2. Emails de fournisseurs publics (gmail, hotmail, yahoo, outlook, etc.)
+
+Cela évite les faux positifs et emails non pertinents.
+
+
+================================================================================
+⏱️ PERFORMANCES
+================================================================================
+
+Temps moyen : ~2.5 secondes par site
+
+Exemples :
+  - 12 sites  = ~30 secondes
+  - 50 sites  = ~2 minutes
+  - 100 sites = ~4 minutes
+  - 500 sites = ~20 minutes
+
+
+================================================================================
+🔧 CONFIGURATION (config.py)
+================================================================================
+
+Paramètres optimisés pour VITESSE + SÉCURITÉ :
+
+  MAX_CONCURRENT_SITES = 10      # 10 sites en parallèle
+  MAX_PAGES_PER_SITE = 7         # 7 pages max par site
+  TIMEOUT = 10                   # 10s timeout par requête
+  DELAY_BETWEEN_REQUESTS = 0.3   # 0.3s entre requêtes
+  SITE_TIMEOUT = 30              # 30s timeout global par site
+
+Si vous voulez PLUS DE SÉCURITÉ (éviter bannissement) :
+  - Augmenter DELAY_BETWEEN_REQUESTS à 1.0 ou 2.0
+  - Réduire MAX_CONCURRENT_SITES à 5
+
+
+================================================================================
+🛡️ SÉCURITÉ
+================================================================================
+
+✅ SAFE :
+  - 1 seul worker → pas de surcharge
+  - Délais entre requêtes → respectueux
+  - User-Agents variés → pas de détection bot basique
+  - Filtrage emails → conforme RGPD
+
+⚠️ RISQUES SI MAL UTILISÉ :
+  - Scraper 1000+ sites/jour → risque de bannissement IP
+  - Sites avec protection anti-bot forte → échec
+  - Utilisation commerciale sans accord → illégal
+
+
+================================================================================
+📝 EXEMPLES DE COMMANDES
+================================================================================
+
+# Ajouter job haute priorité
+python add_job.py avocats-paris.csv --priority 1 --user "Direction"
+
+# Ajouter job normale
+python add_job.py pharmacies-lyon.csv --priority 5 --user "Marketing"
+
+# Ajouter job basse priorité
+python add_job.py test.csv --priority 10 --user "Dev"
+
+# Voir l'état
+python monitor.py
+
+# Démarrer le worker
+python worker.py
+
+
+================================================================================
+🗂️ STRUCTURE DU PROJET
+================================================================================
+
+scrapeur-de-site-pour-google-map-v2/
+├── config.py
+├── extractors.py
+├── utils.py
+├── scraper.py              ⭐ Scraper principal
+├── add_job.py              ⭐ Ajouter job
+├── worker.py               ⭐ Worker
+├── monitor.py              ⭐ Monitoring
+├── requirements.txt
+├── README.md
+├── queue/
+│   ├── pending/           Jobs en attente
+│   ├── processing/        Jobs en cours
+│   └── completed/         Jobs terminés
+└── results/               Résultats JSON
+
+
+================================================================================
+✅ AVANTAGES DE CE SYSTÈME
+================================================================================
+
+✅ Multi-utilisateurs : Plusieurs personnes peuvent ajouter des jobs
+✅ Gestion priorités : Jobs urgents traités en premier
+✅ Sécurisé : 1 seul worker = pas de risque de ban IP
+✅ Robuste : Si worker crash, job remis en pending
+✅ Simple : Pas de base de données, juste des fichiers JSON
+✅ Évolutif : Peut migrer vers Redis plus tard si besoin
+
+
+================================================================================
+FIN DU GUIDE
+================================================================================
+

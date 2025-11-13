@@ -1,0 +1,174 @@
+================================================================================
+🚀 BIENVENUE - SCRAPER EMAILS ET RESEAUX SOCIAUX
+================================================================================
+
+Vous venez de cloner le projet ou de l'installer sur un VPS.
+Voici comment démarrer rapidement !
+
+
+================================================================================
+📖 ÉTAPE 1 : LIRE LA DOCUMENTATION
+================================================================================
+
+DÉBUTANT ? → Lire : GUIDE_UTILISATION.txt
+COMMANDES RAPIDES ? → Lire : COMMANDES_RAPIDES.txt
+DÉPLOIEMENT VPS ? → Lire : DEPLOIEMENT_VPS.md
+PUBLICATION GITHUB ? → Lire : GITHUB_SETUP.md
+
+
+================================================================================
+⚡ DÉMARRAGE RAPIDE (5 MINUTES)
+================================================================================
+
+1. INSTALLER LES DÉPENDANCES
+   ------------------------
+   pip install -r requirements.txt
+
+
+2. DÉMARRER LE WORKER (Terminal 1)
+   --------------------------------
+   python worker.py
+
+   Vous verrez :
+   ################################
+   WORKER DEMARRE
+   ################################
+   En attente de jobs...
+
+
+3. AJOUTER UN JOB (Terminal 2)
+   ----------------------------
+   python add_job.py votre_fichier.csv --priority 1 --user "Votre Nom"
+
+   Le worker commencera automatiquement le scraping !
+
+
+4. CONSULTER L'ÉTAT
+   -----------------
+   python monitor.py
+
+
+5. RÉCUPÉRER LES RÉSULTATS
+   ------------------------
+   Les résultats sont dans : results/scraping_*.json
+
+
+================================================================================
+📊 CE QUE FAIT LE SCRAPER
+================================================================================
+
+Pour chaque site dans votre CSV, le scraper :
+
+  ✅ Visite la page d'accueil
+  ✅ Cherche les pages Contact, Mentions légales, CGV, Politique confidentialité
+  ✅ Extrait les EMAILS (filtrés intelligemment)
+  ✅ Extrait les RÉSEAUX SOCIAUX (Facebook, Instagram, LinkedIn, etc.)
+  ✅ Sauvegarde tout dans un JSON simplifié
+
+
+EMAILS GARDÉS :
+  - Emails du domaine du site (ex: contact@example.com)
+  - Emails publics (gmail, hotmail, yahoo, outlook, etc.)
+
+
+PAGES VISITÉES :
+  - / (accueil)
+  - /contact, /contactez-nous
+  - /mentions-legales
+  - /cgv, /conditions-generales-vente
+  - /cgu, /conditions-generales-utilisation
+  - /politique-confidentialite, /privacy-policy
+  - /rgpd, /donnees-personnelles
+  - /about, /a-propos
+
+
+================================================================================
+📁 FORMAT CSV REQUIS
+================================================================================
+
+Votre CSV doit contenir au minimum la colonne : "Site Web"
+
+Colonnes reconnues (optionnelles) :
+  - Nom
+  - Type
+  - Téléphone Principal
+  - Ville
+  - Note
+
+Voir : example.csv
+
+
+================================================================================
+⏱️ TEMPS DE TRAITEMENT
+================================================================================
+
+Performance moyenne : ~2.5 secondes par site
+
+Exemples :
+  - 10 sites   = 25 secondes
+  - 50 sites   = 2 minutes
+  - 100 sites  = 4 minutes
+  - 500 sites  = 20 minutes
+  - 1000 sites = 40 minutes
+
+
+================================================================================
+🎯 EXEMPLES DE RÉSULTATS
+================================================================================
+
+Fichier JSON généré (simplifié) :
+
+[
+  {
+    "id": 1,
+    "url": "https://example.com",
+    "nom": "Nom du site",
+    "nb_emails": 2,
+    "emails": [
+      "contact@example.com",
+      "info@example.com"
+    ],
+    "nb_reseaux_sociaux": 3,
+    "reseaux_sociaux": {
+      "facebook": ["https://facebook.com/example"],
+      "instagram": ["https://instagram.com/example"],
+      "linkedin": ["https://linkedin.com/company/example"]
+    }
+  }
+]
+
+
+================================================================================
+🔧 CONFIGURATION
+================================================================================
+
+Le fichier config.py est déjà OPTIMISÉ pour :
+  - Vitesse rapide (~2.5s/site)
+  - Sécurité (éviter bannissement IP)
+
+Si vous voulez MODIFIER :
+  - DELAY_BETWEEN_REQUESTS : Délai entre requêtes (0.3s par défaut)
+  - MAX_CONCURRENT_SITES : Sites en parallèle (10 par défaut)
+  - MAX_PAGES_PER_SITE : Pages visitées par site (7 par défaut)
+
+
+================================================================================
+❓ BESOIN D'AIDE ?
+================================================================================
+
+1. Lire GUIDE_UTILISATION.txt
+2. Consulter COMMANDES_RAPIDES.txt
+3. Vérifier les logs : logs/worker.log
+4. GitHub Issues (si repo public)
+
+
+================================================================================
+✅ VOUS ÊTES PRÊT !
+================================================================================
+
+Commencez par : python worker.py
+
+Puis dans un autre terminal : python add_job.py votre_fichier.csv
+
+Bon scraping ! 🎉
+

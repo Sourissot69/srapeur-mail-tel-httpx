@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+scraper.log
+
+# Résultats de scraping (à ne pas commiter)
+results/*.json
+!results/.gitkeep
+
+# Queue (données sensibles)
+queue/pending/*.json
+queue/processing/*.json
+queue/completed/*.json
+!queue/pending/.gitkeep
+!queue/processing/.gitkeep
+!queue/completed/.gitkeep
+
+# Fichiers CSV de données (ne pas commiter les données)
+*.csv
+!example.csv
+
+# Dossier uploads (fichiers uploadés via API)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
+
+# Fichiers temporaires
+*.tmp
+*.temp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variables
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+
