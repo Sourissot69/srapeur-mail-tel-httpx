@@ -51,7 +51,7 @@ BACKOFF_FACTOR = 2  # facteur multiplicateur pour retry
 # Limites de crawling (OPTIMISÉ)
 MAX_PAGES_PER_SITE = 7  # 7 pages pour qualité optimale
 MAX_DEPTH = 2
-MAX_CONCURRENT_SITES = 10  # 10 sites en parallèle
+MAX_CONCURRENT_SITES = 15  # 15 sites en parallèle (gain 50% vitesse)
 
 # Timeout global par site
 SITE_TIMEOUT = 30  # secondes

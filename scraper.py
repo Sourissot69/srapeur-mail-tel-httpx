@@ -57,6 +57,24 @@ class WebScraper:
         headers['User-Agent'] = self.get_random_user_agent()
         return headers
     
+    async def check_page_exists(self, client: httpx.AsyncClient, url: str) -> bool:
+        """
+        Vérifie rapidement si une page existe avec une requête HEAD
+        
+        Args:
+            client: Client HTTP asyncio
+            url: URL à vérifier
+            
+        Returns:
+            True si page existe (200), False sinon
+        """
+        try:
+            response = await client.head(url, timeout=5, follow_redirects=True)
+            return response.status_code == 200
+        except Exception:
+            # En cas d'erreur HEAD, on considère que la page existe (pour être sûr)
+            return True
+    
     async def fetch_page(self, client: httpx.AsyncClient, url: str, retry: int = 0) -> Optional[str]:
         """
         Récupère le contenu d'une page
@@ -199,6 +217,11 @@ class WebScraper:
                                 break
                             
                             if url in self.visited_urls:
+                                continue
+                            
+                            # Vérifier d'abord si la page existe (HEAD request)
+                            if not await self.check_page_exists(client, url):
+                                logger.debug(f"Page inexistante (HEAD), skip: {url}")
                                 continue
                             
                             # Récupérer la page
