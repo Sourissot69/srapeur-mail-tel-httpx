@@ -59,26 +59,34 @@ class EmailExtractor:
         
         soup = BeautifulSoup(html, 'html.parser')
         
-        # 1. Chercher dans le texte visible
+        # 1. Chercher dans TOUS les attributs HTML (href, data-*, onclick, etc.)
+        emails_from_attributes = self._extract_from_all_attributes(soup, page_url)
+        emails_found.extend(emails_from_attributes)
+        
+        # 2. Chercher dans le texte visible
         text = soup.get_text()
         emails_from_text = self._extract_from_text(text, page_url, 'body')
         emails_found.extend(emails_from_text)
         
-        # 2. Chercher dans les attributs href (mailto:)
+        # 3. Chercher dans les attributs href (mailto:)
         emails_from_mailto = self._extract_from_mailto(soup, page_url)
         emails_found.extend(emails_from_mailto)
         
-        # 3. Chercher dans les sections prioritaires
+        # 4. Chercher dans les sections prioritaires
         emails_from_sections = self._extract_from_sections(soup, page_url)
         emails_found.extend(emails_from_sections)
         
-        # 4. Chercher dans les scripts JSON-LD (données structurées)
+        # 5. Chercher dans les scripts JSON-LD (données structurées)
         emails_from_jsonld = self._extract_from_jsonld(soup, page_url)
         emails_found.extend(emails_from_jsonld)
         
-        # 5. Chercher dans les balises meta
+        # 6. Chercher dans les balises meta
         emails_from_meta = self._extract_from_meta(soup, page_url)
         emails_found.extend(emails_from_meta)
+        
+        # 7. Chercher dans le HTML brut (emails encodés)
+        emails_from_raw = self._extract_from_raw_html(html, page_url)
+        emails_found.extend(emails_from_raw)
         
         # Dédupliquer et filtrer
         return self._deduplicate_and_filter(emails_found)
@@ -228,6 +236,53 @@ class EmailExtractor:
                                 'context': f"Meta {meta.get('name', meta.get('property', ''))}",
                                 'type': classify_email_type(email, '')
                             })
+        
+        return emails
+    
+    def _extract_from_all_attributes(self, soup: BeautifulSoup, page_url: str) -> List[Dict]:
+        """Extrait les emails de TOUS les attributs HTML"""
+        emails = []
+        
+        # Chercher dans tous les éléments et tous leurs attributs
+        for tag in soup.find_all(True):
+            for attr_name, attr_value in tag.attrs.items():
+                if isinstance(attr_value, str) and '@' in attr_value:
+                    # Chercher des emails
+                    for pattern in self.EMAIL_PATTERNS:
+                        matches = re.finditer(pattern, attr_value, re.IGNORECASE)
+                        for match in matches:
+                            email = clean_email(match.group(0))
+                            if is_valid_email(email):
+                                section = self._find_parent_section(tag)
+                                context = f"Attribut {attr_name}"
+                                
+                                emails.append({
+                                    'email': email,
+                                    'page': page_url,
+                                    'section': section,
+                                    'context': context,
+                                    'type': classify_email_type(email, '')
+                                })
+        
+        return emails
+    
+    def _extract_from_raw_html(self, html: str, page_url: str) -> List[Dict]:
+        """Extrait les emails du HTML brut (pour emails encodés)"""
+        emails = []
+        
+        # Chercher dans le HTML brut
+        for pattern in self.EMAIL_PATTERNS:
+            matches = re.finditer(pattern, html, re.IGNORECASE)
+            for match in matches:
+                email = clean_email(match.group(0))
+                if is_valid_email(email):
+                    emails.append({
+                        'email': email,
+                        'page': page_url,
+                        'section': 'html_raw',
+                        'context': 'HTML source',
+                        'type': classify_email_type(email, '')
+                    })
         
         return emails
     
@@ -390,6 +445,35 @@ class SocialMediaExtractor:
                             social_media[platform] = []
                         if url not in social_media[platform]:
                             social_media[platform].append(url)
+        
+        # 6. Détecter via classes CSS (icônes sociales)
+        social_classes = {
+            'facebook': ['fa-facebook', 'facebook-icon', 'icon-facebook', 'fb-icon'],
+            'instagram': ['fa-instagram', 'instagram-icon', 'icon-instagram', 'insta-icon'],
+            'twitter': ['fa-twitter', 'twitter-icon', 'icon-twitter', 'x-icon'],
+            'linkedin': ['fa-linkedin', 'linkedin-icon', 'icon-linkedin'],
+            'youtube': ['fa-youtube', 'youtube-icon', 'icon-youtube'],
+        }
+        
+        for platform, class_names in social_classes.items():
+            for class_name in class_names:
+                # Chercher les éléments avec cette classe
+                elements = soup.find_all(class_=re.compile(class_name, re.I))
+                for element in elements:
+                    # Chercher le lien parent ou enfant
+                    parent_link = element.find_parent('a', href=True)
+                    child_link = element.find('a', href=True)
+                    
+                    link = parent_link or child_link
+                    if link:
+                        href = link.get('href', '')
+                        if href and platform.replace('x', 'twitter') in href.lower():
+                            url = self._normalize_social_url(href, platform)
+                            if url:
+                                if platform not in social_media:
+                                    social_media[platform] = []
+                                if url not in social_media[platform]:
+                                    social_media[platform].append(url)
         
         return social_media
     
