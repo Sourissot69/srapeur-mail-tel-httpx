@@ -48,44 +48,20 @@ DELAY_BETWEEN_REQUESTS = 0.3  # secondes entre chaque requête (réduit de 1.0 �
 MAX_RETRIES = 2  # réduit de 3 à 2
 BACKOFF_FACTOR = 2  # facteur multiplicateur pour retry
 
-# Limites de crawling (OPTIMISÉ)
-MAX_PAGES_PER_SITE = 7  # réduit de 10 à 7 (suffit pour trouver les emails)
-MAX_DEPTH = 2
-MAX_CONCURRENT_SITES = 10  # augmenté de 5 à 10 (2x plus rapide)
+# Limites de crawling (OPTIMISÉ VITESSE)
+MAX_PAGES_PER_SITE = 3  # réduit à 3 pour gain de vitesse (60% plus rapide)
+MAX_DEPTH = 1  # réduit à 1 niveau
+MAX_CONCURRENT_SITES = 10  # 10 sites en parallèle
 
 # Timeout global par site
-SITE_TIMEOUT = 30  # secondes (réduit de 45 à 30)
+SITE_TIMEOUT = 20  # secondes (réduit à 20 pour plus de vitesse)
 
-# Pages à chercher (ordre de priorité)
+# Pages à chercher (PRIORITAIRES SEULEMENT - pour vitesse)
+# Seulement les 3 pages les plus susceptibles d'avoir emails/réseaux sociaux
 PAGES_TO_SCRAPE = [
     '/',  # Page d'accueil
     '/contact',
-    '/contactez-nous',
-    '/nous-contacter',
-    '/contact-us',
-    '/coordonnees',
     '/mentions-legales',
-    '/mentions-légales',
-    '/legal-notice',
-    '/cgv',
-    '/conditions-generales-vente',
-    '/conditions-generales-de-vente',
-    '/cgu',
-    '/conditions-generales-utilisation',
-    '/conditions-generales-d-utilisation',
-    '/terms',
-    '/terms-and-conditions',
-    '/politique-confidentialite',
-    '/politique-de-confidentialite',
-    '/privacy-policy',
-    '/rgpd',
-    '/donnees-personnelles',
-    '/protection-donnees',
-    '/about',
-    '/a-propos',
-    '/qui-sommes-nous',
-    '/notre-equipe',
-    '/about-us',
 ]
 
 # Patterns pour détecter les liens importants
