@@ -48,20 +48,23 @@ DELAY_BETWEEN_REQUESTS = 0.3  # secondes entre chaque requête (réduit de 1.0 �
 MAX_RETRIES = 2  # réduit de 3 à 2
 BACKOFF_FACTOR = 2  # facteur multiplicateur pour retry
 
-# Limites de crawling (OPTIMISÉ VITESSE)
-MAX_PAGES_PER_SITE = 3  # réduit à 3 pour gain de vitesse (60% plus rapide)
-MAX_DEPTH = 1  # réduit à 1 niveau
+# Limites de crawling (OPTIMISÉ)
+MAX_PAGES_PER_SITE = 7  # 7 pages pour qualité optimale
+MAX_DEPTH = 2
 MAX_CONCURRENT_SITES = 10  # 10 sites en parallèle
 
 # Timeout global par site
-SITE_TIMEOUT = 20  # secondes (réduit à 20 pour plus de vitesse)
+SITE_TIMEOUT = 30  # secondes
 
-# Pages à chercher (PRIORITAIRES SEULEMENT - pour vitesse)
-# Seulement les 3 pages les plus susceptibles d'avoir emails/réseaux sociaux
+# Pages à chercher (ordre de priorité)
 PAGES_TO_SCRAPE = [
     '/',  # Page d'accueil
     '/contact',
+    '/contactez-nous',
+    '/nous-contacter',
     '/mentions-legales',
+    '/mentions-légales',
+    '/legal-notice',
 ]
 
 # Patterns pour détecter les liens importants
