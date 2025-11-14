@@ -1,4 +1,0 @@
-Nom,Type,Téléphone Principal,Tous les Téléphones,Email Principal,Tous les Emails,Site Web,Adresse,Code Postal,Ville,Pays,Latitude,Longitude,Note,Nombre d'avis,Niveau de Prix,Ouvert Maintenant,Description,Services,Commodités,Réseaux Sociaux,Nombre de Photos,Propriétaire,Établissement Vérifié,URL Google Maps
-"Exemple Entreprise 1","Commerce","01 23 45 67 89","","","","https://example1.com","10 Rue Example","75001","Paris","FR","48.8566","2.3522","4.5","100","","Oui","","","","","0","","Non","https://maps.google.com/example1"
-"Exemple Entreprise 2","Service","09 87 65 43 21","","","","https://example2.com","20 Avenue Example","69001","Lyon","FR","45.7640","4.8357","4.8","250","","Oui","","","","","0","","Non","https://maps.google.com/example2"
-

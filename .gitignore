@@ -49,9 +49,9 @@ queue/completed/*.json
 !queue/processing/.gitkeep
 !queue/completed/.gitkeep
 
-# Fichiers CSV de données (ne pas commiter les données)
-*.csv
-!example.csv
+# Fichiers JSON de données (ne pas commiter les données)
+sites_*.json
+data_*.json
 
 # Dossier uploads (fichiers uploadés via API)
 uploads/*

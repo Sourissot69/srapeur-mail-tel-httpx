@@ -8,7 +8,6 @@ import asyncio
 import json
 import os
 import time
-import csv
 from datetime import datetime
 from pathlib import Path
 from scraper import WebScraper
@@ -77,12 +76,12 @@ class JobWorker:
     async def process_job(self, job):
         """Traite un job de scraping"""
         job_id = job['id']
-        csv_file = job['csv_file']
+        json_file = job['json_file']
         
         print(f"\n{'='*80}")
         print(f"TRAITEMENT DU JOB {job_id}")
         print(f"{'='*80}")
-        print(f"Fichier: {csv_file}")
+        print(f"Fichier: {json_file}")
         print(f"User: {job['user']}")
         print(f"Priorite: {job['priority']}")
         print(f"{'='*80}\n")
@@ -94,24 +93,25 @@ class JobWorker:
         self.current_job = job
         
         try:
-            # Extraire les sites du CSV
+            # Charger le fichier JSON
+            with open(json_file, 'r', encoding='utf-8') as f:
+                input_data = json.load(f)
+            
+            # Extraire les sites du JSON
             sites = []
-            with open(csv_file, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    website = row.get('Site Web', '').strip()
-                    if website and website.startswith('http'):
-                        sites.append({
-                            'url': website,
-                            'name': row.get('Nom', 'Unknown').strip(),
-                            'category': row.get('Type', 'Unknown').strip(),
-                            'phone': row.get('Téléphone Principal', '').strip(),
-                            'city': row.get('Ville', '').strip(),
-                            'rating': row.get('Note', '').strip(),
-                        })
+            for item in input_data:
+                website = item.get('website', '').strip()
+                site_id = item.get('id', '')
+                
+                if website and website.startswith('http'):
+                    sites.append({
+                        'id': site_id,  # Conserver l'ID original
+                        'url': website,
+                        'name': '',  # Sera extrait du site
+                    })
             
             if not sites:
-                raise Exception("Aucun site avec URL trouvé dans le CSV")
+                raise Exception("Aucun site avec URL trouvé dans le JSON")
             
             print(f"Scraping de {len(sites)} sites...\n")
             
@@ -119,10 +119,13 @@ class JobWorker:
             scraper = WebScraper()
             results = await scraper.scrape_multiple_sites(sites)
             
-            # Créer la version simplifiée
+            # Créer la version simplifiée avec ID original
             simplified_results = []
             
-            for idx, result in enumerate(results, 1):
+            for idx, result in enumerate(results):
+                # Récupérer l'ID original depuis sites
+                original_id = sites[idx].get('id', f'site_{idx+1}')
+                
                 emails_list = [email_data['email'] for email_data in result['emails']]
                 
                 social_list = {}
@@ -130,7 +133,7 @@ class JobWorker:
                     social_list[platform] = urls
                 
                 simplified = {
-                    "id": idx,
+                    "id": original_id,  # ID original conservé
                     "url": result['url'],
                     "nom": result['name'],
                     "nb_emails": len(emails_list),
@@ -143,8 +146,8 @@ class JobWorker:
             
             # Sauvegarder le résultat
             os.makedirs('results', exist_ok=True)
-            csv_name = Path(csv_file).stem
-            output_file = f'results/scraping_{csv_name}_{job_id}.json'
+            json_name = Path(json_file).stem
+            output_file = f'results/scraping_{json_name}_{job_id}.json'
             
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(simplified_results, f, ensure_ascii=False, indent=2)

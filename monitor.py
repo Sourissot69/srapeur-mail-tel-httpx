@@ -82,11 +82,11 @@ def monitor_queue():
         print(f"JOB EN COURS")
         print(f"{'='*80}")
         for job in processing_jobs:
-            csv_name = Path(job['csv_file']).name
+            json_name = Path(job.get('json_file', job.get('csv_file', 'N/A'))).name
             started = datetime.fromisoformat(job['started_at'])
             duration = (datetime.now() - started).total_seconds()
             print(f"ID: {job['id']}")
-            print(f"Fichier: {csv_name}")
+            print(f"Fichier: {json_name}")
             print(f"User: {job['user']}")
             print(f"Demarre: {job['started_at']}")
             print(f"Duree: {duration:.0f}s")
@@ -98,8 +98,8 @@ def monitor_queue():
         print(f"JOBS EN ATTENTE ({len(pending_jobs)})")
         print(f"{'='*80}")
         for i, job in enumerate(pending_jobs[:10], 1):
-            csv_name = Path(job['csv_file']).name
-            print(f"{i}. [{job['priority']}] {csv_name} - User: {job['user']}")
+            json_name = Path(job.get('json_file', job.get('csv_file', 'N/A'))).name
+            print(f"{i}. [{job['priority']}] {json_name} - User: {job['user']}")
         
         if len(pending_jobs) > 10:
             print(f"... et {len(pending_jobs) - 10} autres")
@@ -117,10 +117,10 @@ def monitor_queue():
         if recent_completed:
             print("SUCCES:")
             for job in recent_completed:
-                csv_name = Path(job['csv_file']).name
+                json_name = Path(job.get('json_file', job.get('csv_file', 'N/A'))).name
                 duration = format_duration(job['started_at'], job['completed_at'])
                 stats = job.get('stats', {})
-                print(f"  - {csv_name}")
+                print(f"  - {json_name}")
                 print(f"    Duree: {duration}")
                 print(f"    Emails: {stats.get('total_emails', 0)}, Reseaux sociaux: {stats.get('total_social', 0)}")
                 print(f"    Resultat: {Path(job['result_file']).name if job.get('result_file') else 'N/A'}")
@@ -128,14 +128,14 @@ def monitor_queue():
         if recent_errors:
             print("\nERREURS:")
             for job in recent_errors:
-                csv_name = Path(job['csv_file']).name
-                print(f"  - {csv_name}")
+                json_name = Path(job.get('json_file', job.get('csv_file', 'N/A'))).name
+                print(f"  - {json_name}")
                 print(f"    Erreur: {job.get('error', 'Unknown')}")
         
         print(f"{'='*80}\n")
     
     if not pending_jobs and not processing_jobs:
-        print("Queue vide. Ajoutez un job avec: python add_job.py fichier.csv\n")
+        print("Queue vide. Ajoutez un job avec: python add_job.py fichier.json\n")
 
 
 if __name__ == '__main__':

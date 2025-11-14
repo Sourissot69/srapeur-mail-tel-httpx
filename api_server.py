@@ -38,8 +38,8 @@ def health():
 
 
 @app.route('/upload', methods=['POST'])
-def upload_csv():
-    """Upload un fichier CSV"""
+def upload_json():
+    """Upload un fichier JSON"""
     if 'file' not in request.files:
         return jsonify({'error': 'Aucun fichier fourni'}), 400
     
@@ -48,8 +48,8 @@ def upload_csv():
     if file.filename == '':
         return jsonify({'error': 'Nom de fichier vide'}), 400
     
-    if not file.filename.endswith('.csv'):
-        return jsonify({'error': 'Le fichier doit être un CSV'}), 400
+    if not file.filename.endswith('.json'):
+        return jsonify({'error': 'Le fichier doit être un JSON'}), 400
     
     # Sauvegarder le fichier
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -69,22 +69,22 @@ def create_job():
     """Créer un job de scraping"""
     data = request.get_json()
     
-    csv_file = data.get('csv_file')
+    json_file = data.get('json_file')
     priority = data.get('priority', 5)
     user = data.get('user', 'API')
     
-    if not csv_file:
-        return jsonify({'error': 'csv_file requis'}), 400
+    if not json_file:
+        return jsonify({'error': 'json_file requis'}), 400
     
     # Ajouter le job
     try:
-        success = add_job_func(csv_file, priority, user)
+        success = add_job_func(json_file, priority, user)
         
         if success:
             return jsonify({
                 'success': True,
                 'message': 'Job ajouté à la queue',
-                'csv_file': csv_file,
+                'json_file': json_file,
                 'priority': priority,
                 'user': user
             })
@@ -180,7 +180,7 @@ def download_result(filename):
 
 @app.route('/job/upload-and-start', methods=['POST'])
 def upload_and_start():
-    """Upload CSV et démarre le job immédiatement"""
+    """Upload JSON et démarre le job immédiatement"""
     if 'file' not in request.files:
         return jsonify({'error': 'Aucun fichier fourni'}), 400
     
@@ -188,8 +188,8 @@ def upload_and_start():
     priority = request.form.get('priority', 5, type=int)
     user = request.form.get('user', 'API')
     
-    if file.filename == '' or not file.filename.endswith('.csv'):
-        return jsonify({'error': 'Fichier CSV valide requis'}), 400
+    if file.filename == '' or not file.filename.endswith('.json'):
+        return jsonify({'error': 'Fichier JSON valide requis'}), 400
     
     try:
         # Sauvegarder le fichier
@@ -204,7 +204,7 @@ def upload_and_start():
         if success:
             return jsonify({
                 'success': True,
-                'message': 'CSV uploadé et job ajouté',
+                'message': 'JSON uploadé et job ajouté',
                 'filename': filename,
                 'priority': priority
             })

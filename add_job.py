@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Script pour ajouter un job de scraping à la queue
-Usage: python add_job.py fichier.csv [--priority 1-10]
+Usage: python add_job.py fichier.json [--priority 1-10]
 """
 
 import json
@@ -11,18 +11,23 @@ from datetime import datetime
 import argparse
 
 
-def add_job(csv_file: str, priority: int = 5, user: str = "default"):
+def add_job(json_file: str, priority: int = 5, user: str = "default"):
     """
     Ajoute un job à la queue
     
     Args:
-        csv_file: Chemin vers le fichier CSV
+        json_file: Chemin vers le fichier JSON
         priority: Priorité (1=haute, 10=basse)
         user: Nom de l'utilisateur
     """
     # Vérifier que le fichier existe
-    if not os.path.exists(csv_file):
-        print(f"Erreur: Fichier {csv_file} introuvable")
+    if not os.path.exists(json_file):
+        print(f"Erreur: Fichier {json_file} introuvable")
+        return False
+    
+    # Vérifier que c'est un fichier .json
+    if not json_file.endswith('.json'):
+        print(f"Erreur: Le fichier doit être un JSON (.json)")
         return False
     
     # Créer l'ID du job (timestamp)
@@ -32,7 +37,7 @@ def add_job(csv_file: str, priority: int = 5, user: str = "default"):
     job = {
         "id": job_id,
         "user": user,
-        "csv_file": os.path.abspath(csv_file),
+        "json_file": os.path.abspath(json_file),
         "status": "pending",
         "priority": priority,
         "created_at": datetime.now().isoformat(),
@@ -53,7 +58,7 @@ def add_job(csv_file: str, priority: int = 5, user: str = "default"):
     print(f"JOB AJOUTE A LA QUEUE")
     print(f"{'='*80}")
     print(f"ID: {job_id}")
-    print(f"Fichier: {csv_file}")
+    print(f"Fichier: {json_file}")
     print(f"Priorite: {priority}")
     print(f"User: {user}")
     print(f"{'='*80}")
@@ -66,12 +71,12 @@ def add_job(csv_file: str, priority: int = 5, user: str = "default"):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ajouter un job de scraping à la queue')
-    parser.add_argument('csv_file', help='Fichier CSV à scraper')
+    parser.add_argument('json_file', help='Fichier JSON à scraper (format: [{"id":"...","website":"..."}])')
     parser.add_argument('--priority', type=int, default=5, choices=range(1, 11),
                         help='Priorité du job (1=haute, 10=basse), défaut=5')
     parser.add_argument('--user', default='default', help='Nom de l\'utilisateur')
     
     args = parser.parse_args()
     
-    add_job(args.csv_file, args.priority, args.user)
+    add_job(args.json_file, args.priority, args.user)
 
