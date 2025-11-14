@@ -114,33 +114,52 @@ class EmailExtractor:
         """Extrait les emails des liens mailto:"""
         emails = []
         
-        mailto_links = soup.find_all('a', href=re.compile(r'^mailto:', re.I))
+        # Chercher dans tous les liens (href contenant @)
+        all_links = soup.find_all('a', href=True)
         
-        for link in mailto_links:
+        for link in all_links:
             href = link.get('href', '')
-            # Extraire l'email du mailto:
-            email_match = re.search(r'mailto:([^?&]+)', href, re.I)
-            if email_match:
-                email = clean_email(email_match.group(1))
-                
-                if is_valid_email(email):
-                    # Déterminer la section
-                    section = self._find_parent_section(link)
+            
+            # Mailto: classique
+            if href.lower().startswith('mailto:'):
+                email_match = re.search(r'mailto:([^?&\s]+)', href, re.I)
+                if email_match:
+                    email = clean_email(email_match.group(1))
                     
-                    # Obtenir le contexte (texte du lien et autour)
-                    context = link.get_text(strip=True)
-                    if link.parent:
-                        context += ' ' + link.parent.get_text(strip=True)[:100]
+                    if is_valid_email(email):
+                        section = self._find_parent_section(link)
+                        context = link.get_text(strip=True)
+                        if link.parent:
+                            context += ' ' + link.parent.get_text(strip=True)[:100]
+                        
+                        email_type = classify_email_type(email, context)
+                        
+                        emails.append({
+                            'email': email,
+                            'page': page_url,
+                            'section': section,
+                            'context': context,
+                            'type': email_type
+                        })
+            
+            # Emails dans href sans mailto:
+            elif '@' in href:
+                email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', href)
+                if email_match:
+                    email = clean_email(email_match.group(0))
                     
-                    email_type = classify_email_type(email, context)
-                    
-                    emails.append({
-                        'email': email,
-                        'page': page_url,
-                        'section': section,
-                        'context': context,
-                        'type': email_type
-                    })
+                    if is_valid_email(email):
+                        section = self._find_parent_section(link)
+                        context = link.get_text(strip=True)
+                        email_type = classify_email_type(email, context)
+                        
+                        emails.append({
+                            'email': email,
+                            'page': page_url,
+                            'section': section,
+                            'context': context,
+                            'type': email_type
+                        })
         
         return emails
     
@@ -298,7 +317,7 @@ class SocialMediaExtractor:
         
         soup = BeautifulSoup(html, 'html.parser')
         
-        # Chercher dans les liens
+        # 1. Chercher dans tous les attributs href
         all_links = soup.find_all('a', href=True)
         
         for link in all_links:
@@ -316,11 +335,54 @@ class SocialMediaExtractor:
                             if url not in social_media[platform]:
                                 social_media[platform].append(url)
         
-        # Chercher aussi dans le texte brut (URLs non linkées)
+        # 2. Chercher dans les attributs data-* (icônes sociales)
+        for tag in soup.find_all(True):
+            for attr, value in tag.attrs.items():
+                if isinstance(value, str):
+                    for platform, patterns in self.patterns.items():
+                        for pattern in patterns:
+                            match = re.search(pattern, value, re.IGNORECASE)
+                            if match:
+                                url = self._normalize_social_url(match.group(0), platform)
+                                if url:
+                                    if platform not in social_media:
+                                        social_media[platform] = []
+                                    if url not in social_media[platform]:
+                                        social_media[platform].append(url)
+        
+        # 3. Chercher dans le texte et scripts
+        # Texte visible
         text = soup.get_text()
         for platform, patterns in self.patterns.items():
             for pattern in patterns:
                 matches = re.finditer(pattern, text, re.IGNORECASE)
+                for match in matches:
+                    url = self._normalize_social_url(match.group(0), platform)
+                    if url:
+                        if platform not in social_media:
+                            social_media[platform] = []
+                        if url not in social_media[platform]:
+                            social_media[platform].append(url)
+        
+        # 4. Chercher dans les scripts JavaScript
+        scripts = soup.find_all('script')
+        for script in scripts:
+            script_text = script.string if script.string else ''
+            for platform, patterns in self.patterns.items():
+                for pattern in patterns:
+                    matches = re.finditer(pattern, script_text, re.IGNORECASE)
+                    for match in matches:
+                        url = self._normalize_social_url(match.group(0), platform)
+                        if url:
+                            if platform not in social_media:
+                                social_media[platform] = []
+                            if url not in social_media[platform]:
+                                social_media[platform].append(url)
+        
+        # 5. Chercher dans HTML brut (cas où c'est encodé)
+        for platform, patterns in self.patterns.items():
+            for pattern in patterns:
+                matches = re.finditer(pattern, html, re.IGNORECASE)
                 for match in matches:
                     url = self._normalize_social_url(match.group(0), platform)
                     if url:
