@@ -44,7 +44,7 @@ EMAIL_PROVIDERS = [
 
 # Timeouts et délais (OPTIMISÉ POUR VITESSE)
 TIMEOUT = 10  # secondes (réduit de 15 à 10)
-DELAY_BETWEEN_REQUESTS = 0.3  # secondes entre chaque requête (réduit de 1.0 à 0.3)
+DELAY_BETWEEN_REQUESTS = 0.1  # secondes entre chaque requête (RÉDUIT à 0.1 pour vitesse)
 MAX_RETRIES = 2  # réduit de 3 à 2
 BACKOFF_FACTOR = 2  # facteur multiplicateur pour retry
 
